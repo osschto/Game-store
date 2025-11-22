@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlmodel
+SQLAlchemy
+pydantic
+python-dotenv
+email-validator
+python-multipart

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Database
+database.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp

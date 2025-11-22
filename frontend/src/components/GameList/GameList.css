@@ -1,0 +1,30 @@
+.game-list-wrapper {
+  width: 100%;
+}
+
+.game-list-title {
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-text-primary);
+}
+
+.game-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.game-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--color-text-secondary);
+  font-size: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .game-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+}
