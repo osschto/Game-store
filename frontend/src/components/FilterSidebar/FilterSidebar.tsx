@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Genre, Platform } from '@/types/api';
 import './FilterSidebar.css';
@@ -30,22 +31,58 @@ export const FilterSidebar = ({
   onSortChange,
 }: FilterSidebarProps) => {
   const { t } = useTranslation();
+  const [range, setRange] = useState({ min: minPrice, max: maxPrice });
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const sortOptions = [
+    { value: 'newest', label: t('filters.newest') },
+    { value: 'oldest', label: t('filters.oldest') },
+    { value: 'price-asc', label: t('filters.priceAsc') },
+    { value: 'price-desc', label: t('filters.priceDesc') },
+    { value: 'rating', label: t('filters.rating') },
+  ];
+
+  const handleMinChange = (value: number) => {
+    const newMin = Math.min(value, range.max);
+    setRange({ ...range, min: newMin });
+    onPriceChange(newMin, range.max);
+  };
+
+  const handleMaxChange = (value: number) => {
+    const newMax = Math.max(value, range.min);
+    setRange({ ...range, max: newMax });
+    onPriceChange(range.min, newMax);
+  };
 
   return (
     <div className="filter-sidebar">
       <div className="filter-section">
         <h3 className="filter-title">{t('filters.sortBy')}</h3>
-        <select
-          value={sortBy}
-          onChange={(e) => onSortChange(e.target.value)}
-          className="filter-select"
-        >
-          <option value="newest">{t('filters.newest')}</option>
-          <option value="oldest">{t('filters.oldest')}</option>
-          <option value="price-asc">{t('filters.priceAsc')}</option>
-          <option value="price-desc">{t('filters.priceDesc')}</option>
-          <option value="rating">{t('filters.rating')}</option>
-        </select>
+        <div className="custom-dropdown">
+          <button
+            className={`dropdown-toggle ${sortOpen ? 'open' : ''}`}
+            onClick={() => setSortOpen(!sortOpen)}
+          >
+            {sortOptions.find((o) => o.value === sortBy)?.label || t('filters.newest')}
+            <span className="arrow" />
+          </button>
+          {sortOpen && (
+            <ul className="dropdown-menu">
+              {sortOptions.map((option) => (
+                <li
+                  key={option.value}
+                  className={`dropdown-item ${sortBy === option.value ? 'active' : ''}`}
+                  onClick={() => {
+                    onSortChange(option.value);
+                    setSortOpen(false);
+                  }}
+                >
+                  {option.label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className="filter-section">
@@ -90,53 +127,52 @@ export const FilterSidebar = ({
         </div>
       </div>
 
-      {/* ---------- DOUBLE RANGE SLIDER WITH MANUAL INPUTS ---------- */}
       <div className="filter-section">
         <h3 className="filter-title">{t('filters.priceRange')}</h3>
-
         <div className="range-slider-container">
-          <input
-            type="range"
-            min="0"
-            max="10000"
-            value={minPrice}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (value <= maxPrice) onPriceChange(value, maxPrice);
-            }}
-            className="range-input"
-          />
-
-          <input
-            type="range"
-            min="0"
-            max="10000"
-            value={maxPrice}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (value >= minPrice) onPriceChange(minPrice, value);
-            }}
-            className="range-input"
-          />
-
-          <div className="range-values">{minPrice} — {maxPrice}</div>
+          <div className="slider">
+            <input
+              type="range"
+              min={0}
+              max={10000}
+              value={range.min}
+              onChange={(e) => handleMinChange(Number(e.target.value))}
+              className="thumb thumb-left"
+            />
+            <input
+              type="range"
+              min={0}
+              max={10000}
+              value={range.max}
+              onChange={(e) => handleMaxChange(Number(e.target.value))}
+              className="thumb thumb-right"
+            />
+            <div
+              className="slider-track"
+              style={{
+                left: `${(range.min / 10000) * 100}%`,
+                right: `${100 - (range.max / 10000) * 100}%`,
+              }}
+            />
+          </div>
 
           <div className="manual-price-inputs">
             <input
               type="number"
-              value={minPrice}
+              value={range.min}
               min={0}
-              max={maxPrice}
-              onChange={(e) => onPriceChange(Number(e.target.value), maxPrice)}
+              max={range.max}
+              onChange={(e) => handleMinChange(Number(e.target.value))}
               className="manual-price-input"
               placeholder="Min"
             />
             <span className="manual-price-separator">-</span>
             <input
               type="number"
-              value={maxPrice}
-              min={minPrice}
-              onChange={(e) => onPriceChange(minPrice, Number(e.target.value))}
+              value={range.max}
+              min={range.min}
+              max={10000}
+              onChange={(e) => handleMaxChange(Number(e.target.value))}
               className="manual-price-input"
               placeholder="Max"
             />

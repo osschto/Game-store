@@ -62,7 +62,7 @@ class ApiService {
     });
   }
 
-  async login(data: { email: string; password: string }): Promise<{ access_token: string; token_type: string }> {
+  async login(data: { name: string; password: string }): Promise<{ access_token: string; token_type: string }> {
     return this.request('/users/login', {
       method: 'POST',
       body: JSON.stringify(data),

@@ -58,9 +58,10 @@ export const Home = () => {
   };
 
   const featuredGames = games.slice(0, 4);
-  const newReleases = [...games]
-    .sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime())
-    .slice(0, 6);
+  const topRatedGames = [...games]
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 6)
+    .filter((game) => game.rating > 0);
 
   if (loading) {
     return <div className="loading">{t('common.loading')}</div>;
@@ -158,12 +159,12 @@ export const Home = () => {
         </section>
       )}
 
-      {newReleases.length > 0 && (
-        <section className="section section-new-releases">
+      {topRatedGames.length > 0 && (
+        <section className="section section-top-rated">
           <div className="container">
-            <h2 className="section-title">{t('home.newReleases')}</h2>
-            <div className="new-releases-grid">
-              {newReleases.map((game) => (
+            <h2 className="section-title">{t('home.topRated')}</h2>
+            <div className="top-rated-grid">
+              {topRatedGames.map((game) => (
                 <Link key={game.id} to={`/game/${game.id}`} className="release-card">
                   <div className="release-image">
                     <img
@@ -173,13 +174,12 @@ export const Home = () => {
                         (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/400x225/1a1f26/3b82f6?text=${encodeURIComponent(game.title)}`;
                       }}
                     />
-                    <div className="release-badge">NEW</div>
+                    <span className="top-rated-badge">⭐ Top Rated</span>
                   </div>
                   <div className="release-info">
-                    <h3 className="release-title">{game.title}</h3>
-                    <div className="release-meta">
+                    <div className="release-title-rating">
+                      <h3 className="release-title">{game.title}</h3>
                       <span className="release-rating">⭐ {game.rating.toFixed(1)}</span>
-                      <span className="release-price">₽{game.price.toFixed(2)}</span>
                     </div>
                   </div>
                 </Link>
@@ -192,36 +192,22 @@ export const Home = () => {
   );
 };
 
-// Genre icon mapping
 function getGenreIcon(genreName: string): string {
   const icons: Record<string, string> = {
-    Action: '🎯',
-    Экшен: '🎯',
-    Adventure: '🗺️',
-    Приключение: '🗺️',
-    RPG: '⚔️',
-    РПГ: '⚔️',
-    Strategy: '🧠',
-    Стратегия: '🧠',
-    Simulation: '🎮',
-    Симулятор: '🎮',
-    Sports: '⚽',
-    Спорт: '⚽',
-    Racing: '🏎️',
-    Гонки: '🏎️',
-    Shooter: '🔫',
-    Шутер: '🔫',
-    Puzzle: '🧩',
-    Головоломка: '🧩',
-    Horror: '👻',
-    Хоррор: '👻',
-    Fighting: '🥊',
-    Файтинг: '🥊',
-    Platformer: '🪜',
-    Платформер: '🪜',
+    Action: '🎯', Экшен: '🎯',
+    Adventure: '🗺️', Приключение: '🗺️',
+    RPG: '⚔️', РПГ: '⚔️',
+    Strategy: '🧠', Стратегия: '🧠',
+    Simulation: '🎮', Симулятор: '🎮',
+    Sports: '⚽', Спорт: '⚽',
+    Racing: '🏎️', Гонки: '🏎️',
+    Shooter: '🔫', Шутер: '🔫',
+    Puzzle: '🧩', Головоломка: '🧩',
+    Horror: '👻', Хоррор: '👻',
+    Fighting: '🥊', Файтинг: '🥊',
+    Platformer: '🪜', Платформер: '🪜',
     MOBA: '🛡️',
-    Sandbox: '🪣',
-    Песочница: '🪣'
+    Sandbox: '🪣', Песочница: '🪣'
   };
 
   for (const [key, icon] of Object.entries(icons)) {
@@ -229,6 +215,5 @@ function getGenreIcon(genreName: string): string {
       return icon;
     }
   }
-
   return '🎮';
 }

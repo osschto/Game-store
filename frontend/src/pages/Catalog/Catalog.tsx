@@ -12,7 +12,7 @@ export const Catalog = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [games, setGames] = useState<Game[]>([]);
+  const [allGames, setAllGames] = useState<Game[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
 
@@ -38,8 +38,8 @@ export const Catalog = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    searchAndFilterGames();
-  }, [selectedGenre, selectedPlatform, minPrice, maxPrice, sortBy, searchQuery]);
+    fetchGames();
+  }, [searchQuery]);
 
   const loadInitialData = async () => {
     try {
@@ -57,7 +57,7 @@ export const Catalog = () => {
     }
   };
 
-  const searchAndFilterGames = async () => {
+  const fetchGames = async () => {
     try {
       setLoading(true);
       let fetchedGames: Game[] = [];
@@ -68,44 +68,48 @@ export const Catalog = () => {
         fetchedGames = await api.getGames();
       }
 
-      let filtered = [...fetchedGames];
-
-      if (selectedGenre !== null) {
-        filtered = filtered.filter((game) => game.genre_id === selectedGenre);
-      }
-
-      if (selectedPlatform !== null) {
-        filtered = filtered.filter((game) => game.platform_id === selectedPlatform);
-      }
-
-      filtered = filtered.filter(
-        (game) => game.price >= minPrice && game.price <= maxPrice
-      );
-
-      switch (sortBy) {
-        case 'newest':
-          filtered.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime());
-          break;
-        case 'oldest':
-          filtered.sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime());
-          break;
-        case 'price-asc':
-          filtered.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-desc':
-          filtered.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          filtered.sort((a, b) => b.rating - a.rating);
-          break;
-      }
-
-      setGames(filtered);
+      setAllGames(fetchedGames);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch games');
     } finally {
       setLoading(false);
     }
+  };
+
+  const getFilteredGames = (): Game[] => {
+    let filtered = [...allGames];
+
+    if (selectedGenre !== null) {
+      filtered = filtered.filter((game) => game.genre_id === selectedGenre);
+    }
+
+    if (selectedPlatform !== null) {
+      filtered = filtered.filter((game) => game.platform_id === selectedPlatform);
+    }
+
+    filtered = filtered.filter(
+      (game) => game.price >= minPrice && game.price <= maxPrice
+    );
+
+    switch (sortBy) {
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime());
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime());
+        break;
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+    }
+
+    return filtered;
   };
 
   const handleSearch = (query: string) => {
@@ -130,12 +134,14 @@ export const Catalog = () => {
     return (
       <div className="error">
         <p>{error}</p>
-        <button onClick={searchAndFilterGames} className="btn btn-primary">
+        <button onClick={fetchGames} className="btn btn-primary">
           {t('common.retry')}
         </button>
       </div>
     );
   }
+
+  const games = getFilteredGames();
 
   return (
     <div className="catalog">
@@ -163,11 +169,13 @@ export const Catalog = () => {
           </aside>
 
           <main className="catalog-main">
-            <div className="catalog-results">
-              <p className="results-count">
-                {games.length} {games.length === 1 ? t('common.gameFound') : t('common.gamesFound')}
-              </p>
-            </div>
+            {games.length > 0 && (
+              <div className="catalog-results">
+                <p className="results-count">
+                  {games.length} {games.length === 1 ? t('common.gameFound') : t('common.gamesFound')}
+                </p>
+              </div>
+            )}
             <GameList games={games} />
           </main>
         </div>

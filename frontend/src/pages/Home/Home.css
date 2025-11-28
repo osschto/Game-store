@@ -23,7 +23,6 @@
   background: linear-gradient(135deg, var(--color-accent) 0%, #60a5fa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .hero-subtitle {
@@ -90,7 +89,6 @@
 
 .section-genres {
   background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
-  padding: var(--spacing-3xl) 0;
 }
 
 .genre-scroll-wrapper {
@@ -103,66 +101,6 @@
   overflow: hidden;
   scroll-behavior: smooth;
   padding: var(--spacing-md) calc(var(--spacing-lg) + 40px);
-  margin: 0;
-}
-
-.genre-scroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.genre-scroll::-webkit-scrollbar-thumb {
-  background-color: var(--color-accent);
-  border-radius: var(--radius-md);
-}
-
-:root {
-  --scroll-btn-bg: rgba(60, 75, 96, 0.6);
-  --scroll-btn-hover-bg: rgba(60, 75, 96, 0.8);
-  --scroll-btn-stroke: #60a5fa;
-}
-
-[data-theme="light"] {
-  --scroll-btn-bg: rgba(255, 255, 255, 1);
-  --scroll-btn-hover-bg: rgba(241, 245, 249, 0.8);
-  --scroll-btn-stroke: #1e3a8a;
-}
-
-.scroll-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  background-color: var(--scroll-btn-bg);
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-}
-
-.scroll-btn.left {
-  left: 0;
-}
-
-.scroll-btn.right {
-  right: 0;
-}
-
-.scroll-btn:hover {
-  background-color: var(--scroll-btn-hover-bg);
-  transform: translateY(-50%) scale(1.1);
-}
-
-.scroll-btn svg {
-  stroke: var(--scroll-btn-stroke);
-  width: 20px;
-  height: 20px;
 }
 
 .genre-card-horizontal {
@@ -203,11 +141,38 @@
   font-weight: 500;
 }
 
-.section-new-releases {
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background-color: var(--scroll-btn-bg, rgba(60, 75, 96, 0.6));
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.scroll-btn.left { left: 0; }
+.scroll-btn.right { right: 0; }
+
+.scroll-btn:hover {
+  background-color: var(--scroll-btn-hover-bg, rgba(60, 75, 96, 0.8));
+  transform: translateY(-50%) scale(1.1);
+}
+
+.section-top-rated {
   background-color: var(--color-bg-primary);
 }
 
-.new-releases-grid {
+.top-rated-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--spacing-xl);
@@ -248,53 +213,45 @@
   transform: scale(1.1);
 }
 
-.release-badge {
-  position: absolute;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  letter-spacing: 0.5px;
-}
-
 .release-info {
   padding: var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
 }
 
-.release-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.release-meta {
+.release-title-rating {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.release-rating {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
-.release-price {
+.release-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.release-rating {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #facc15;
+}
+
+.top-rated-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
+  color: #1f2937;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 5;
 }
 
 @media (max-width: 1024px) {
-  .new-releases-grid {
+  .top-rated-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
@@ -320,7 +277,7 @@
     width: 180px;
   }
 
-  .new-releases-grid {
+  .top-rated-grid {
     grid-template-columns: 1fr;
   }
 }
