@@ -196,7 +196,7 @@ function getGenreIcon(genreName: string): string {
   const icons: Record<string, string> = {
     Action: '🎯', Экшен: '🎯',
     Adventure: '🗺️', Приключение: '🗺️',
-    RPG: '⚔️', РПГ: '⚔️',
+    RPG: '🏹', РПГ: '🏹',
     Strategy: '🧠', Стратегия: '🧠',
     Simulation: '🎮', Симулятор: '🎮',
     Sports: '⚽', Спорт: '⚽',
@@ -205,9 +205,11 @@ function getGenreIcon(genreName: string): string {
     Puzzle: '🧩', Головоломка: '🧩',
     Horror: '👻', Хоррор: '👻',
     Fighting: '🥊', Файтинг: '🥊',
-    Platformer: '🪜', Платформер: '🪜',
-    MOBA: '🛡️',
-    Sandbox: '🪣', Песочница: '🪣'
+    Platformer: '👾', Платформер: '👾',
+    MOBA: '⚔️', МОБА: '⚔️',
+    Sandbox: '🧱', Песочница: '🧱',
+    Roguelike: '♾️', Рогалик: '♾️',
+    ActionRPG: '🎭', 'Ролевой экшен': '🎭'
   };
 
   for (const [key, icon] of Object.entries(icons)) {

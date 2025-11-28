@@ -155,18 +155,10 @@
 }
 
 .library-game-title {
-  font-size: 1.125rem;
+  font-size: 1.250rem;
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
-}
-
-.library-game-rating {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
 }
 
 .orders-list {

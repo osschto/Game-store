@@ -187,8 +187,6 @@ export const Profile = () => {
                         <div className="library-game-info">
                           <h3 className="library-game-title">{game.title}</h3>
                           <div className="library-game-rating">
-                            <span>⭐</span>
-                            <span>{game.rating.toFixed(1)}</span>
                           </div>
                         </div>
                       </Link>
