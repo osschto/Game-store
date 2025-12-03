@@ -94,6 +94,10 @@ class ApiService {
     });
   }
 
+  async getAllOrders(): Promise<Order[]> {
+    return this.request<Order[]>('/orders/');
+  }
+
   async getUserOrders(userId: number): Promise<Order[]> {
     return this.request<Order[]>(`/orders/${userId}`);
   }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SearchBar } from '@/components/SearchBar/SearchBar';
 import { api } from '@/services/api';
 import type { Game, Genre } from '@/types/api';
@@ -14,11 +14,20 @@ export const Home = () => {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const genreScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % 3);
+    }, 5000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const loadData = async () => {
@@ -29,7 +38,14 @@ export const Home = () => {
         api.getGenres(),
       ]);
       setGames(gamesData);
-      setGenres(genresData);
+
+      const genresWithCount = genresData.map(genre => ({
+        ...genre,
+        gameCount: gamesData.filter(g => g.genre_id === genre.id).length
+      }));
+      const sortedGenres = genresWithCount.sort((a, b) => b.gameCount - a.gameCount);
+      setGenres(sortedGenres);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
@@ -57,10 +73,48 @@ export const Home = () => {
     }
   };
 
-  const featuredGames = games.slice(0, 4);
+  const getMostPurchasedGames = async (): Promise<Game[]> => {
+    try {
+      const orders = await api.getAllOrders();
+
+      const purchaseCount: Record<number, number> = {};
+      orders.forEach(order => {
+        purchaseCount[order.game_id] = (purchaseCount[order.game_id] || 0) + 1;
+      });
+
+      const sortedGameIds = Object.entries(purchaseCount)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([id]) => Number(id));
+
+      const featuredGames = sortedGameIds
+        .map(id => games.find(g => g.id === id))
+        .filter((game): game is Game => game !== undefined);
+
+      if (featuredGames.length < 3) {
+        const remainingGames = games
+          .filter(g => !featuredGames.find(fg => fg.id === g.id))
+          .slice(0, 3 - featuredGames.length);
+        return [...featuredGames, ...remainingGames];
+      }
+
+      return featuredGames;
+    } catch {
+      return games.slice(0, 3);
+    }
+  };
+
+  const [featuredGames, setFeaturedGames] = useState<Game[]>([]);
+
+  useEffect(() => {
+    if (games.length > 0) {
+      getMostPurchasedGames().then(setFeaturedGames);
+    }
+  }, [games]);
+
   const topRatedGames = [...games]
     .sort((a, b) => b.rating - a.rating)
-    .slice(0, 6)
+    .slice(0, 3)
     .filter((game) => game.rating > 0);
 
   if (loading) {
@@ -99,22 +153,40 @@ export const Home = () => {
         <section className="section">
           <div className="container">
             <h2 className="section-title">{t('home.featured')}</h2>
-            <div className="featured-grid">
-              {featuredGames.map((game) => (
-                <Link key={game.id} to={`/game/${game.id}`} className="featured-card">
-                  <img
-                    src={`/images/games/large/${game.id}.jpg`}
-                    alt={game.title}
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/800x450/1a1f26/3b82f6?text=${encodeURIComponent(game.title)}`;
-                    }}
+            <div className="carousel-container">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5 }}
+                  className="carousel-slide"
+                >
+                  <Link to={`/game/${featuredGames[currentSlide].id}`} className="featured-card-large">
+                    <img
+                      src={`/images/games/large/${featuredGames[currentSlide].id}.jpg`}
+                      alt={featuredGames[currentSlide].title}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/1200x600/1a1f26/3b82f6?text=${encodeURIComponent(featuredGames[currentSlide].title)}`;
+                      }}
+                    />
+                    <div className="featured-info">
+                      <h3>{featuredGames[currentSlide].title}</h3>
+                    </div>
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+              <div className="carousel-indicators">
+                {featuredGames.slice(0, 3).map((_, index) => (
+                  <button
+                    key={index}
+                    className={`indicator ${currentSlide === index ? 'active' : ''}`}
+                    onClick={() => setCurrentSlide(index)}
+                    aria-label={`Slide ${index + 1}`}
                   />
-                  <div className="featured-info">
-                    <h3>{game.title}</h3>
-                    <p>₽{game.price.toFixed(2)}</p>
-                  </div>
-                </Link>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -143,7 +215,7 @@ export const Home = () => {
                     <div className="genre-icon">{getGenreIcon(genre.name)}</div>
                     <h3 className="genre-name">{genre.name}</h3>
                     <div className="genre-count">
-                      {games.filter((g) => g.genre_id === genre.id).length} games
+                      {games.filter((g) => g.genre_id === genre.id).length} {t('home.games')}
                     </div>
                   </motion.button>
                 ))}
@@ -174,12 +246,12 @@ export const Home = () => {
                         (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/400x225/1a1f26/3b82f6?text=${encodeURIComponent(game.title)}`;
                       }}
                     />
-                    <span className="top-rated-badge">⭐ Top Rated</span>
+                    <span className="top-rated-badge">{t('home.topRatedBadge')}</span>
                   </div>
                   <div className="release-info">
                     <div className="release-title-rating">
                       <h3 className="release-title">{game.title}</h3>
-                      <span className="release-rating">⭐ {game.rating.toFixed(1)}</span>
+                      <span className="release-rating">{game.rating.toFixed(1)}</span>
                     </div>
                   </div>
                 </Link>

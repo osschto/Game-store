@@ -24,6 +24,35 @@
   transform: scale(1.1);
 }
 
+.early-access-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+  animation: badge-fade-in 0.4s ease;
+}
+
+@keyframes badge-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .game-card-overlay {
   position: absolute;
   inset: 0;
@@ -64,9 +93,6 @@
 .game-card-rating {
   font-weight: 600;
   color: var(--color-text-secondary);
-  background: none;
-  padding: 0;
-  border-radius: 0;
 }
 
 .game-card-description {
@@ -88,11 +114,6 @@
   font-weight: 700;
   color: var(--color-accent);
 }
-
-/* .game-card-date {
-  font-size: 0.875rem;
-  color: var(--color-text-tertiary);
-} */
 
 @media (max-width: 768px) {
   .game-card-title {

@@ -19,6 +19,7 @@ export const GameCard = ({ game }: GameCardProps) => {
   });
 
   const isInCart = items.some((item) => item.game.id === game.id);
+  const isEarlyAccess = new Date(game.release_date) > new Date();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,15 +36,24 @@ export const GameCard = ({ game }: GameCardProps) => {
     >
       <Link to={`/game/${game.id}`} className="game-card">
         <div className="game-card-image">
+          {isEarlyAccess && (
+            <div className="early-access-badge">
+              {t('game.earlyAccess')}
+            </div>
+          )}
+
           <img
             src={`/images/games/small/${game.id}.jpg`}
             alt={game.title}
             loading="lazy"
             style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/400x225/1a1f26/3b82f6?text=${encodeURIComponent(game.title)}`;
+              (e.currentTarget as HTMLImageElement).src = `https://via.placeholder.com/400x225/1a1f26/3b82f6?text=${encodeURIComponent(
+                game.title
+              )}`;
             }}
           />
+
           <div className="game-card-overlay">
             <button
               onClick={handleAddToCart}
@@ -62,12 +72,13 @@ export const GameCard = ({ game }: GameCardProps) => {
           </div>
 
           <p className="game-card-description">
-            {game.description.length > 100 ? `${game.description.substring(0, 100)}...` : game.description}
+            {game.description.length > 100
+              ? `${game.description.substring(0, 100)}...`
+              : game.description}
           </p>
 
           <div className="game-card-footer">
             <span className="game-card-price">₽{game.price.toFixed(2)}</span>
-            {/* <span className="game-card-date">{game.release_date}</span> */}
           </div>
         </div>
       </Link>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Genre, Platform } from '@/types/api';
 import './FilterSidebar.css';
@@ -33,6 +33,7 @@ export const FilterSidebar = ({
   const { t } = useTranslation();
   const [range, setRange] = useState({ min: minPrice, max: maxPrice });
   const [sortOpen, setSortOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const sortOptions = [
     { value: 'newest', label: t('filters.newest') },
@@ -42,23 +43,38 @@ export const FilterSidebar = ({
     { value: 'rating', label: t('filters.rating') },
   ];
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleMinChange = (value: number) => {
-    const newMin = Math.min(value, range.max);
+    if (range.max === 1) return;
+    const newMin = Math.min(value, 9999, range.max);
     setRange({ ...range, min: newMin });
     onPriceChange(newMin, range.max);
   };
 
   const handleMaxChange = (value: number) => {
-    const newMax = Math.max(value, range.min);
+    if (range.min === 9999) return;
+    const newMax = Math.max(range.min, Math.min(value, 10000));
     setRange({ ...range, max: newMax });
     onPriceChange(range.min, newMax);
   };
+
+  const minZIndex = range.min >= 9999 && range.max === 10000 ? 3 : 2;
+  const maxZIndex = range.min >= 9999 && range.max === 10000 ? 2 : 3;
 
   return (
     <div className="filter-sidebar">
       <div className="filter-section">
         <h3 className="filter-title">{t('filters.sortBy')}</h3>
-        <div className="custom-dropdown">
+        <div className="custom-dropdown" ref={dropdownRef}>
           <button
             className={`dropdown-toggle ${sortOpen ? 'open' : ''}`}
             onClick={() => setSortOpen(!sortOpen)}
@@ -131,22 +147,6 @@ export const FilterSidebar = ({
         <h3 className="filter-title">{t('filters.priceRange')}</h3>
         <div className="range-slider-container">
           <div className="slider">
-            <input
-              type="range"
-              min={0}
-              max={10000}
-              value={range.min}
-              onChange={(e) => handleMinChange(Number(e.target.value))}
-              className="thumb thumb-left"
-            />
-            <input
-              type="range"
-              min={0}
-              max={10000}
-              value={range.max}
-              onChange={(e) => handleMaxChange(Number(e.target.value))}
-              className="thumb thumb-right"
-            />
             <div
               className="slider-track"
               style={{
@@ -154,14 +154,31 @@ export const FilterSidebar = ({
                 right: `${100 - (range.max / 10000) * 100}%`,
               }}
             />
+            <input
+              type="range"
+              min={0}
+              max={9999}
+              value={range.min}
+              onChange={(e) => handleMinChange(Number(e.target.value))}
+              className="thumb thumb-left"
+              style={{ zIndex: minZIndex }}
+            />
+            <input
+              type="range"
+              min={1}
+              max={10000}
+              value={range.max}
+              onChange={(e) => handleMaxChange(Number(e.target.value))}
+              className="thumb thumb-right"
+              style={{ zIndex: maxZIndex }}
+            />
           </div>
-
           <div className="manual-price-inputs">
             <input
               type="number"
               value={range.min}
               min={0}
-              max={range.max}
+              max={Math.min(range.max, 9999)}
               onChange={(e) => handleMinChange(Number(e.target.value))}
               className="manual-price-input"
               placeholder="Min"
